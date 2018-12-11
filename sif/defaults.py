@@ -41,4 +41,4 @@ _cache = os.path.join(USERHOME, ".singularity")
 SINGULARITY_CACHE = getenv("SINGULARITY_CACHEDIR", default=_cache)
 
 # Temporary Storage
-SIF_TMPDIR = os.environ.get('SREGISTRY_TMPDIR', tempfile.gettempdir())
+SIF_TMPDIR = os.environ.get('SIF_TMPDIR', tempfile.gettempdir())

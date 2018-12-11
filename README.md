@@ -1,7 +1,10 @@
 # SIF (Python)
 
 Sif Python (sif) is the Python API for working with the Singularity SIF image
-format. This library is under development. 
+format. This library is under development! The basic functionality so far is to 
+parse the header, only using Python:
+
+![docs/img/header-parse.png](docs/img/header-parse.png)
 
 [![asciicast](https://asciinema.org/a/216447.svg)](https://asciinema.org/a/216447?speed=2)
 

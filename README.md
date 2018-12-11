@@ -33,6 +33,19 @@ Found SIF version 01
 Found SIF arch 02
 ```
 
+You don't have to load the header right away:
+
+```python
+header = SIFHeader('boxes.simg', load=False)
+boxes.simg is a SIF file.
+
+header.load_header()
+
+Architecture: AMD64 arch code
+Found SIF version 01
+Found SIF arch 02
+```
+
 **This is not a SIF image**
 
 ```python

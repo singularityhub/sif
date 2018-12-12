@@ -162,7 +162,7 @@ class SIFHeader:
             # 2. Read the architecture
             self.meta['arch'] = self.unpack_bytes(filey, 
                                                   number=self.base.HdrArchLen,
-                                                  fmt = "%ss" % self.base.HdrVersionLen)
+                                                  fmt = "<%ss" % self.base.HdrArchLen)
 
             # 3. Read the uuid - this returns little endian bytes
             uuid_bytes = self.read_bytes(filey, fmt='<16c')

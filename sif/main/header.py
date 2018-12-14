@@ -64,20 +64,29 @@ class SIFHeader:
         '''
         for key, val in self.meta.items():
             bot.info('SIF Header %s %s' % (key, val) )
+        bot.newline()
+
+    def print_descriptor_deffile(self):
+        '''print the definition file metadata for the user to see
+        '''
+        for key, val in self.desc['deffile'].items():
+            if key != 'content':
+                bot.info('Deffile %s %s' % (key, val) )
+        bot.newline()
 
     def print_deffile(self):
         '''print the definition file for the user to see
         '''
-        for key, val in self.desc['deffile'].items():
-            if key != 'deffile':
-                bot.info('Deffile %s %s' % (key, val) )
+        if 'deffile' in self.desc:
+            if 'content' in self.desc['deffile']:
+                print(self.desc['deffile']['content'])
 
     def print_arch(self):
         '''print the human friendly architecture'''
         if 'arch' in self.meta:
             if self.meta['arch'] in self.arches:
                 bot.info('Architecture: %s' % self.arches[self.meta['arch']])
-
+            bot.newline()
 
 ################################################################################
 # Validation
@@ -133,6 +142,18 @@ class SIFHeader:
         self.base = SIF.HeaderBase
         self.arches = SIF.arches
         self.Deffile = SIF.Deffile 
+
+
+    def read_and_strip(self, filey, fmt, number=None):
+        '''read a number of bytes (number of based on a format) from the
+           file, remove empty / white spaces indicated by \0.
+        '''
+        values = self.read_bytes(filey, fmt, number)
+         
+        try:
+            return values.decode('utf-8').replace('\0', '')
+        except:
+            return values
 
 
     def read_bytes(self, filey, fmt, number=None):
@@ -216,10 +237,8 @@ class SIFHeader:
 
         # Update the user with what was loaded
         self.print_meta()
-        bot.newline()
         self.print_arch()
-        bot.newline()
-        self.print_deffile() 
+        self.print_descriptor_deffile() 
 
 ################################################################################
 # Descriptors
@@ -262,7 +281,19 @@ class SIFHeader:
 
         # And the length is also provided
         fmt = '%sc' % descriptors['Filelen']
-        descriptors['deffile'] = self.unpack_bytes(filey, fmt)
+        number = calcsize(fmt)
+        deffile = filey.read(number)
+
+        # Try to decode to utf-8 for the user
+        try:
+            deffile = deffile.decode('utf-8')
+        except:
+            pass
+
+        descriptors['content'] = deffile
+
+        # Can we get a name (this seems wrong)
+        descriptors['name'] = self.read_and_strip(filey, self.meta.DescrNameLen)
 
         # Close the file, if wanted
         if close_file is True:

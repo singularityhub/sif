@@ -17,17 +17,19 @@
 import os
 import uuid
 from sif.logger import bot
-from sif.header import ( bases, arches )
 from sif.defaults import SIF_VERSION
 from struct import ( unpack, calcsize )
 
 class SIFHeader:
 
-    def __init__(self, image, load = True):
+    def __init__(self, image, load_header=True, version=None):
 
         # Load the base for a particular SIF version
-        self.load_base()
+        self.load_base(version)
+
+        # We will store global headers, and descriptors
         self.meta = dict()
+        self.desc = dict()
 
         if not os.path.exists(image):
             bot.exit('Cannot find %s.' % image)
@@ -39,7 +41,7 @@ class SIFHeader:
         self.image = image
 
         # The user might want to wait to load
-        if load:
+        if load_header is True:
             self.load_header()
 
 
@@ -51,23 +53,37 @@ class SIFHeader:
         '''representation of SIF image is also the path'''
         return self.__str__()
 
+
+################################################################################
+# Printing
+################################################################################
+
+
     def print_meta(self):
         '''print the metadata for the user to see
         '''
         for key, val in self.meta.items():
-            bot.info('Found SIF %s %s' % (key, val) )
+            bot.info('SIF Header %s %s' % (key, val) )
+
+    def print_deffile(self):
+        '''print the definition file for the user to see
+        '''
+        for key, val in self.desc['deffile'].items():
+            if key != 'deffile':
+                bot.info('Deffile %s %s' % (key, val) )
 
     def print_arch(self):
         '''print the human friendly architecture'''
         if 'arch' in self.meta:
-            if self.meta['arch'] in arches:
-                bot.info('Architecture: %s' % arches[self.meta['arch']])
+            if self.meta['arch'] in self.arches:
+                bot.info('Architecture: %s' % self.arches[self.meta['arch']])
 
-    def load_base(self, version="02"):
-        '''load a sif base, or default to version 02
-        '''
-        self.base = bases.get(SIF_VERSION, version)
- 
+
+################################################################################
+# Validation
+################################################################################
+
+
     def is_sif(self, image):
         '''determine if an image is SIF based on finding SIF_MAGIC
         ''' 
@@ -81,7 +97,7 @@ class SIFHeader:
             fmt = "%ss" % self.base.HdrMagicLen
 
             # Read length of header magic
-            line = self.unpack_bytes(filey, fmt=fmt)
+            line = self.unpack_chars(filey, fmt=fmt)
 
             if line != None:
                 if isinstance(line, str) and line.startswith(self.base.HdrMagic):
@@ -90,56 +106,69 @@ class SIFHeader:
             return False
 
 
-    def read_bytes(self, filey, number=None, fmt=None):
-        '''read AND unpack a number of bytes from an open file. If a 
-           format is provided, convert to utf-8 and return the string. 
-           If fmt is None, assume a character string of the same length.
-
-           Parameters
-           ==========
-           filey: an open file object
-           number: the number of bytes to read
-           fmt: an optional format string
+    def unpack_chars(self, filey, fmt, number=None, encoding='utf-8', idx=0):
+        '''unpack characters, and handle the encoding and removing
+           an end character.
         '''
-        if fmt == None and number == None:
-            bot.exit('You must provide a format string OR a number of bytes')
-
-        if fmt == None:
-            fmt = "%ss" % number
-
-        elif number == None:
-            number = calcsize(fmt)
-
-        return filey.read(number)
-
-    def unpack_bytes(self, filey, number=None, fmt=None, encoding='utf-8'):
-        '''read AND unpack a number of bytes from an open file. If a 
-           format is provided, convert to utf-8 and return the string. 
-           If fmt is None, assume a character string of the same length.
-
-           Parameters
-           ==========
-           filey: an open file object
-           number: the number of bytes to read
-           fmt: an optional format string
-        '''
-        line = self.read_bytes(filey, number, fmt)
-        try:
-            return self.unpack(fmt, line, encoding)
-        except:
-            pass
-
-    def unpack(self, fmt, line, encoding='utf-8'):
-        '''a wrapper around unpack that handles the encoding and removing
-           an end character
-        '''
-        line = unpack(fmt, line)[0]
+        line = self.unpack_bytes(filey, fmt, number)[idx]
 
         # Return numbers, otherwise parse bytes to string
         if isinstance(line, (int, float)):
             return line
 
         return line.decode(encoding).replace(self.base.EndChar, '')
+
+
+################################################################################
+# Loading
+################################################################################
+
+    def load_base(self, version=None):
+        '''load a sif base, or default to version 02
+        '''
+        from sif.header import get_structure
+        SIF = get_structure(version)
+
+        # We have a header base, arches, and Descriptors
+        self.base = SIF.HeaderBase
+        self.arches = SIF.arches
+        self.Deffile = SIF.Deffile 
+
+
+    def read_bytes(self, filey, fmt, number=None):
+        '''just read a number of bytes from an open file.
+
+           Parameters
+           ==========
+           filey: an open file object
+           number: the number of bytes to read
+           fmt: an optional format string
+        '''
+        if number == None:
+            number = calcsize(fmt)
+
+        return filey.read(number)
+
+
+    def unpack_bytes(self, filey, fmt, number=None):
+        '''read AND unpack a number of bytes from an open file. If a 
+           format is provided, convert to utf-8 and return the string. 
+           If fmt is None, assume a character string of the same length.
+
+           Parameters
+           ==========
+           filey: an open file object
+           number: the number of bytes to read
+           fmt: an optional format string
+        '''
+        byte_values = self.read_bytes(filey, fmt, number)
+        return unpack(fmt, byte_values)
+
+
+
+################################################################################
+# Global Header
+################################################################################
 
             
     def load_header(self):
@@ -155,12 +184,12 @@ class SIFHeader:
             filey.seek(byte_start)
 
             # 1. Read the version
-            self.meta['version'] = self.unpack_bytes(filey, 
+            self.meta['version'] = self.unpack_chars(filey, 
                                                      number=self.base.HdrVersionLen, 
                                                      fmt = "%ss" % self.base.HdrVersionLen)
 
             # 2. Read the architecture
-            self.meta['arch'] = self.unpack_bytes(filey, 
+            self.meta['arch'] = self.unpack_chars(filey, 
                                                   number=self.base.HdrArchLen,
                                                   fmt = "<%ss" % self.base.HdrArchLen)
 
@@ -168,11 +197,75 @@ class SIFHeader:
             uuid_bytes = self.read_bytes(filey, fmt='<16c')
             self.meta['uuid'] = str(uuid.UUID(bytes_le=uuid_bytes))
 
-            # 4. Read in the ctime, 1 signed int
-            items = ['ctime', 'mtime', 'ndescr', 'descroff', 'dataoff', 'datalen']
+            # 4. Read in the remaining Global header fields, 1 signed int
+            items = ['ctime', 
+                     'mtime', 
+                     'dfree',
+                     'dtotal',
+                     'descroff',
+                     'descrlen', 
+                     'dataoff', 
+                     'datalen']
+
             for item in items:
-                self.meta[item] = self.unpack_bytes(filey, fmt='1q')
+                self.meta[item] = self.unpack_bytes(filey, fmt='1q')[0]
+
+            # Load the definition file descriptors
+            self.desc['deffile'] = self._load_deffile(filey)
+
 
         # Update the user with what was loaded
-        self.print_arch()
         self.print_meta()
+        bot.newline()
+        self.print_arch()
+        bot.newline()
+        self.print_deffile() 
+
+################################################################################
+# Descriptors
+################################################################################
+
+
+    def _load_deffile(self, filey=None, close_file=False):
+        ''' load the header descriptor for the definition file. If a file
+            object is not provided, open. The fields and format string are 
+            provided via the self.Deffile object, which we get from 
+            self.header --> __init__.py --> get_structure() --> SIF
+
+            Parameters
+            ==========
+            filey: an (optional) open file object. We will seek to start of
+                   the description offset, if it was read in the global header.
+        '''
+
+        # By default, we assume that we will not close the file handle
+        close_file = False
+ 
+        # Unless it's not provided, we need to clean up
+        if filey == None:
+            filey = open(self.image, 'rb')
+            close_file = True
+
+        # Read to the description offset
+        descriptors = dict()
+        filey.seek(self.meta['descroff'])
+
+        # see sif.header module for the default fields and format strings
+        values = self.unpack_bytes(filey, self.Deffile.fmt)
+         
+        # Update the descriptors dictionary
+        for d in range(len(values)):
+            descriptors[self.Deffile.fields[d]] = values[d]
+
+        # Definition File - offset should point us to the deffile    
+        filey.seek(descriptors['Fileoff'])
+
+        # And the length is also provided
+        fmt = '%sc' % descriptors['Filelen']
+        descriptors['deffile'] = self.unpack_bytes(filey, fmt)
+
+        # Close the file, if wanted
+        if close_file is True:
+            filey.close()
+
+        return descriptors

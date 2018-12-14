@@ -4,9 +4,39 @@ Sif Python (sif) is the Python API for working with the Singularity SIF image
 format. This library is under development! The basic functionality so far is to 
 parse the header, only using Python:
 
-![docs/img/header-parse.png](docs/img/header-parse.png)
+```
+SIFHeader('boxes.simg')
+boxes.simg is a SIF file.
+SIF Header version 01
+SIF Header arch 02
+SIF Header uuid 0eae46df-1975-e44c-888b-8b9915f87f52
+SIF Header ctime 1544537033
+SIF Header mtime 1544537033
+SIF Header dfree 46
+SIF Header dtotal 48
+SIF Header descroff 4096
+SIF Header descrlen 28080
+SIF Header dataoff 32768
+SIF Header datalen 196952064
 
-[![asciicast](https://asciinema.org/a/216447.svg)](https://asciinema.org/a/216447?speed=2)
+Architecture: AMD64 arch code
+
+Deffile Datatype 16385
+Deffile Used True
+Deffile ID 1
+Deffile Groupid 4026531841
+Deffile Link 0
+Deffile Fileoff 32768
+Deffile Filelen 39
+Deffile Storelen 39
+Deffile Ctime 1544537033
+Deffile Mtime 1544537033
+Deffile UID 0
+Deffile Gid 0
+<SIF:boxes.simg>
+```
+
+
 
 ## Usage
 

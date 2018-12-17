@@ -216,6 +216,8 @@ class SIFHeader:
 
             # 3. Read the uuid - this returns little endian bytes
             uuid_bytes = self.read_bytes(filey, fmt='<16c')
+
+            # Let the uuid library read the binary data for us!
             self.meta['uuid'] = str(uuid.UUID(bytes_le=uuid_bytes))
 
             # 4. Read in the remaining Global header fields, 1 signed int
@@ -293,7 +295,7 @@ class SIFHeader:
         descriptors['content'] = deffile
 
         # Can we get a name (this seems wrong)
-        descriptors['name'] = self.read_and_strip(filey, self.meta.DescrNameLen)
+        # descriptors['name'] = self.read_and_strip(filey, self.base.DescrNameLen)
 
         # Close the file, if wanted
         if close_file is True:

@@ -48,7 +48,10 @@ def get_structure(version=None):
         version = SIF_VERSION
 
     if version == "02":
-        from .v02 import ( HeaderBase, arches, Deffile )
+        from .v02 import ( HeaderBase, 
+                           arches, 
+                           Deffile, 
+                           Partition )
 
     SIF.HeaderBase = HeaderBase()
     SIF.arches = arches

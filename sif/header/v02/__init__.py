@@ -23,4 +23,4 @@ see https://github.com/sylabs/sif/blob/master/pkg/sif/sif.go
 # We will add different versions to bases
 
 from .globalHeader import ( arches, HeaderBase )
-from .descriptors import ( Deffile )
+from .descriptors import ( Deffile, Partition )

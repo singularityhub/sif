@@ -20,8 +20,10 @@ see https://github.com/sylabs/sif/blob/master/pkg/sif/sif.go
 
 '''
 
-class Deffile:
-    '''A SIF Deffile descriptor is read after the global header See
+class Descriptor:
+    '''A SIF Descriptor is the base, from which we derive 
+       a Deffile, Signature, and Partition block. We read the descriptors after 
+       the global header See
        https://github.com/sylabs/sif/blob/master/pkg/sif/sif.go for details
        This isn't a class with functions, just an organizational structure
        for fields and the format string.    
@@ -45,6 +47,7 @@ class Deffile:
 
     '''
 
+    name = 'Descriptor'
     fields = [
                    "Datatype",  
                    "Used",
@@ -63,8 +66,33 @@ class Deffile:
     fmt = '<i?3I7q'
 
     def __str__(self):
-        return "SIF Descriptor Definition Version 02"
+        return "SIF Descriptor version 02 %s" % self.name
 
     def __repr__(self):
         return self.__str__()
 
+
+class Deffile(Descriptor):
+    '''A SIF Deffile is the first descriptor. It is essentially a Descriptor.
+    '''
+    name = 'Deffile'
+
+    def __init__(self):
+        Descriptor.__init__(self)
+
+
+class Partition(Descriptor):
+    '''A SIF Partition is the third block (id 2 at index 1). It has,
+       in addition to the same fields, a fstype, parttype, and content.
+       In addition to the fields under Descriptor we add:
+
+           fstype: Squashfs   int32
+           parttype: System   int32
+           content: Linux     (not sure)
+    '''
+    name = 'Partition'
+
+    def __init__(self):
+        Descriptor.__init__(self)
+        self.fields += ['fstype', 'parttype', 'content']
+        self.fmt = '%s2i' % self.fmt

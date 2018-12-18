@@ -5,7 +5,6 @@ format. This library is under development! The basic functionality so far is to
 parse the header, only using Python:
 
 ```
-SIFHeader('boxes.simg')
 boxes.simg is a SIF file.
 SIF Header version 01
 SIF Header arch 02
@@ -33,6 +32,25 @@ Deffile Ctime 1544537033
 Deffile Mtime 1544537033
 Deffile UID 0
 Deffile Gid 0
+Deffile name .
+Deffile extra 
+
+Partition Datatype 16388
+Partition Used True
+Partition ID 2
+Partition Groupid 4026531841
+Partition Link 0
+Partition Fileoff 36864
+Partition Filelen 196947968
+Partition Storelen 196952025
+Partition Ctime 1544537033
+Partition Mtime 1544537033
+Partition UID 0
+Partition Gid 0
+Partition name squashfs-955608129.img
+Partition fstype 1
+Partition partype 2
+Partition extra 02
 <SIF:boxes.simg>
 ```
 

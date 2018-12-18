@@ -51,9 +51,12 @@ def get_structure(version=None):
         from .v02 import ( HeaderBase, 
                            arches, 
                            Deffile, 
-                           Partition )
+                           Partition,
+                           Signature )
 
     SIF.HeaderBase = HeaderBase()
     SIF.arches = arches
     SIF.Deffile = Deffile()
+    SIF.Partition = Partition()
+    SIF.Signature = Signature()
     return SIF

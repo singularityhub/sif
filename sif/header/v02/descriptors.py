@@ -48,19 +48,18 @@ class Descriptor:
     '''
 
     name = 'Descriptor'
-    fields = [
-                   "Datatype",  
-                   "Used",
-                   "ID",
-                   "Groupid",
-                   "Link",
-                   "Fileoff",
-                   "Filelen",
-                   "Storelen",
-                   "Ctime",
-                   "Mtime",
-                   "UID",
-                   "Gid"     ]
+    fields = [ "Datatype",  
+               "Used",
+               "ID",
+               "Groupid",
+               "Link",
+               "Fileoff",
+               "Filelen",
+               "Storelen",
+               "Ctime",
+               "Mtime",
+               "UID",
+               "Gid"     ]
 
     # Format string to read in above
     fmt = '<i?3I7q'
@@ -84,7 +83,8 @@ class Deffile(Descriptor):
 class Partition(Descriptor):
     '''A SIF Partition is the third block (id 2 at index 1). It has,
        in addition to the same fields, a fstype, parttype, and content.
-       In addition to the fields under Descriptor we add:
+       I'm not sure what content is, but the fstype and partype (I think)
+       are under "extra"
 
            fstype: Squashfs   int32
            parttype: System   int32
@@ -94,5 +94,16 @@ class Partition(Descriptor):
 
     def __init__(self):
         Descriptor.__init__(self)
-        self.fields += ['fstype', 'parttype', 'content']
-        self.fmt = '%s2i' % self.fmt
+
+
+class Signature(Descriptor):
+    '''A SIF Signature is the fourth block (third descriptor) 
+       It has the following fields under "extra"
+
+           hashtype: SHA384
+           entity: @ 
+    '''
+    name = 'Signature'
+
+    def __init__(self):
+        Descriptor.__init__(self)

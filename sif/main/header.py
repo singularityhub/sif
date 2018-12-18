@@ -59,7 +59,7 @@ class SIFHeader:
 ################################################################################
 
 
-    def print_meta(self):
+    def print_header(self):
         '''print the metadata for the user to see
         '''
         for key, val in self.meta.items():
@@ -72,6 +72,20 @@ class SIFHeader:
         for key, val in self.desc['deffile'].items():
             if key != 'content':
                 bot.info('Deffile %s %s' % (key, val) )
+        bot.newline()
+
+    def print_descriptor_partition(self):
+        '''print the partition metadata for the user to see!
+        '''
+        for key, val in self.desc['partition'].items():
+            bot.info('Partition %s %s' % (key, val) )
+        bot.newline()
+
+    def print_descriptor_signature(self):
+        '''print the partition metadata for the user to see!
+        '''
+        for key, val in self.desc['signature'].items():
+            bot.info('Signature %s %s' % (key, val) )
         bot.newline()
 
     def print_deffile(self):
@@ -138,11 +152,14 @@ class SIFHeader:
         from sif.header import get_structure
         SIF = get_structure(version)
 
-        # We have a header base, arches, and Descriptors
+        # We have a header base, arches
         self.base = SIF.HeaderBase
         self.arches = SIF.arches
-        self.Deffile = SIF.Deffile 
 
+        # Descriptors
+        self.Deffile = SIF.Deffile 
+        self.Partition = SIF.Partition
+        self.Signature = SIF.Signature
 
     def read_and_strip(self, filey, fmt, number=None):
         '''read a number of bytes (number of based on a format) from the
@@ -234,38 +251,29 @@ class SIFHeader:
                 self.meta[item] = self.unpack_bytes(filey, fmt='1q')[0]
 
             # Load the definition file descriptors
-            self.desc['deffile'] = self._load_deffile(filey)
-
+            self.desc['deffile'] = self._load_deffile()
+            self.desc['partition'] = self._load_partition()
+            self.desc['signature'] = self._load_signature()
 
         # Update the user with what was loaded
-        self.print_meta()
+        self.print_header()
         self.print_arch()
         self.print_descriptor_deffile() 
+        self.print_descriptor_partition() 
 
 ################################################################################
 # Descriptors
 ################################################################################
 
 
-    def _load_deffile(self, filey=None, close_file=False):
+    def _load_deffile(self):
         ''' load the header descriptor for the definition file. If a file
             object is not provided, open. The fields and format string are 
             provided via the self.Deffile object, which we get from 
             self.header --> __init__.py --> get_structure() --> SIF
-
-            Parameters
-            ==========
-            filey: an (optional) open file object. We will seek to start of
-                   the description offset, if it was read in the global header.
         '''
 
-        # By default, we assume that we will not close the file handle
-        close_file = False
- 
-        # Unless it's not provided, we need to clean up
-        if filey == None:
-            filey = open(self.image, 'rb')
-            close_file = True
+        filey = open(self.image, 'rb')
 
         # Read to the description offset
         descriptors = dict()
@@ -277,6 +285,16 @@ class SIFHeader:
         # Update the descriptors dictionary
         for d in range(len(values)):
             descriptors[self.Deffile.fields[d]] = values[d]
+
+        # Can we get a name (this seems wrong) - loads as "."
+        name = self.read_and_strip(filey, "%sc" % self.base.DescrNameLen)
+        extra = self.read_and_strip(filey, '%sc' % self.base.DescrMaxPrivLen)
+
+        descriptors['name'] = name
+        descriptors['extra'] = extra
+
+        # Save the location for the start of the partition
+        self.Partition.start = filey.tell()
 
         # Definition File - offset should point us to the deffile    
         filey.seek(descriptors['Fileoff'])
@@ -293,12 +311,70 @@ class SIFHeader:
             pass
 
         descriptors['content'] = deffile
-
-        # Can we get a name (this seems wrong)
-        # descriptors['name'] = self.read_and_strip(filey, self.base.DescrNameLen)
-
-        # Close the file, if wanted
-        if close_file is True:
-            filey.close()
+        filey.close()
 
         return descriptors
+
+
+    def _load_partition(self):
+        ''' load the paritition descriptor. We must get the start based on
+            first reading the deffile desciptor, which adds the location
+            to self.Parition.start. If we don't have this attribute, we need
+            to run it first (This should not happen in normal cases, as they
+            are called under one function, one after the other)
+        '''
+        if not hasattr(self.Partition, 'start'):
+            self._load_deffile()
+
+        filey = open(self.image, 'rb')
+
+        partition = dict()
+        filey.seek(self.Partition.start)
+
+        # see sif.header module for the default fields and format strings
+        values = self.unpack_bytes(filey, self.Deffile.fmt)
+         
+        # Update the descriptors dictionary
+        for d in range(len(values)):
+            partition[self.Partition.fields[d]] = values[d]
+
+        # squashfs-955608129.img
+        name = self.read_and_strip(filey, "%sc" % self.base.DescrNameLen)
+        partition['name'] = name
+
+        # I think partype and fstype might be part of extra?
+        fstype, partype = self.unpack_bytes(filey, "2i")
+        partition['fstype'] = fstype        
+        partition['partype'] = partype
+
+        # The remaining extra is the self.base.DescrMaxPrivLen - len(2i)
+        fmt = '%sc' % (self.base.DescrMaxPrivLen - calcsize('2i'))
+       
+        # Can we get a name (this seems wrong) !
+        extra = self.read_and_strip(filey, fmt)
+
+        partition['extra'] = extra
+
+        # Can we find the start of the signature?
+        self.Signature.start = filey.tell()
+        filey.close()
+        return partition
+
+
+    def _load_signature(self):
+        '''finally, load the signature descriptor. We again get the start
+           based on loading the partition first.
+
+           # NOT DONE YET
+        '''
+        if not hasattr(self.Signature, 'start'):
+            self._load_partition()
+
+        filey = open(self.image, 'rb')
+
+        signature = dict()
+
+        # NOT DONE YET
+
+        filey.close()
+        return signature

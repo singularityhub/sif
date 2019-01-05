@@ -14,13 +14,13 @@ SIF Header version 01
 SIF Header arch 02
 SIF Header uuid 0eae46df-1975-e44c-888b-8b9915f87f52
 SIF Header ctime 1544537033
-SIF Header mtime 1544537033
-SIF Header dfree 46
+SIF Header mtime 1546726508
+SIF Header dfree 45
 SIF Header dtotal 48
 SIF Header descroff 4096
 SIF Header descrlen 28080
 SIF Header dataoff 32768
-SIF Header datalen 196952064
+SIF Header datalen 196953019
 
 Architecture: AMD64 arch code
 
@@ -55,7 +55,42 @@ Partition name squashfs-955608129.img
 Partition fstype 1
 Partition partype 2
 Partition extra 02
-<SIF:boxes.simg>
+
+Signature Datatype 16389
+Signature Used True
+Signature ID 3
+Signature Groupid 4026531841
+Signature Link 2
+Signature Fileoff 196984832
+Signature Filelen 955
+Signature Storelen 955
+Signature Ctime 1546726508
+Signature Mtime 1546726508
+Signature UID 0
+Signature Gid 0
+Signature name part-signature
+Signature hastype 2
+Signature publicKey -----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+SIFHASH:
+4de3d88a550a8c1976b54b91445b027af718cb0bf38133c50dcd723fdba54a28177008e2f4bb7e7cc81aa4d82c0c27fa
+-----BEGIN PGP SIGNATURE-----
+
+wsFcBAEBCAAQBQJcMSxrCRBi+gdpIWqw6QAAiZsQAAJgTPQ5QVuiLq0s7PAM9gPK
+YLmxEN3UiTS0BF2a/DffKmYMCdrZwKyx0fybWZMOAREfobTbbqNhL0dvk6idMtfR
+wvHSDmKl1gx9LZ764ddyaX/NdsHZMrtDLBe2AMuCoAEZOpN0/BQQRiuQMYBbWiVz
+3DMyvvqXdzKnc6OYu1wBlr+q0GG2I4HRGGfZayZUHtgh4okPVJSndxgD5Rz1zeC5
+GZUiHJyh3Jru8wc7hEivgHGXRfP5S+VedrGYX/gam/iH26t/nMGY7AFN5IIMr1t0
+I54HCJCf0NcwTfruzwwE80d6+BrLa082uuS6qD+PKhyEaqm8jZVFw2On9EJuIkje
+R6f3Q2IagrOHh/axGrXMUcSA6tBkw0IRbS/NBw/0hjpiRLCOY5C+qp4WWS+Oo34k
+09eO4UmlDkKTScc72yxNRTAMBc0f/o5pncirXVCwbUMAMkMsZOBS8lN72WFDGzk4
+mnOTsiBntG29ryjtWQctKWJN+M7v8s8ib+iFCgBJbMyBR//z4z1OkkCUDxee5bvF
+bnvAVpEpOj0DvOmH/2za3Olyoez3ueGo5HNCfbKq4FBgKo/KB3cIp41cVcohSpSV
+zgtARAKG1paRof+zXP0xatL+TDXazytRyNgXrprJbrZvjm4/jXhhT31D8s/8kZx1
+hK2q7TKN3URs6h7olmt+
+=E8Je
+-----END PGP SIGNATURE-----
 ```
 
 
@@ -71,6 +106,7 @@ export SIF_VERSION
 ```
 
 ### Python
+
 In Python, you will likely want to start with an image, and load it for inspection.
 The client will quickly tell you if it's a SIF header or not based on the `SIF_MAGIC`
 after the interpreter line:

@@ -66,27 +66,36 @@ class SIFHeader:
             bot.info('SIF Header %s %s' % (key, val) )
         bot.newline()
 
-    def print_descriptor_deffile(self):
+    def print_descriptor(self, descriptor, skip_keys=None):
         '''print the definition file metadata for the user to see
-        '''
-        for key, val in self.desc['deffile'].items():
-            if key != 'content':
-                bot.info('Deffile %s %s' % (key, val) )
+
+           Parameters
+           ==========
+           name: the key in self.desc to iterate over
+           skip_keys: skip these keys in self.desc[key]
+        ''' 
+        if skip_keys == None:
+            skip_keys = []
+
+        if not isinstance(skip_keys, list):
+            skip_keys = [skip_keys]
+
+        if descriptor in self.desc:
+            name = descriptor.capitalize()
+            for key, val in self.desc[descriptor].items():
+                if key not in skip_keys:
+                    bot.info('%s %s %s' % (name, key, val) )
         bot.newline()
+
+
+    def print_descriptor_deffile(self):
+        self.print_descriptor('deffile', 'content')
 
     def print_descriptor_partition(self):
-        '''print the partition metadata for the user to see!
-        '''
-        for key, val in self.desc['partition'].items():
-            bot.info('Partition %s %s' % (key, val) )
-        bot.newline()
+        self.print_descriptor('partition')
 
     def print_descriptor_signature(self):
-        '''print the partition metadata for the user to see!
-        '''
-        for key, val in self.desc['signature'].items():
-            bot.info('Signature %s %s' % (key, val) )
-        bot.newline()
+        self.print_descriptor('signature')
 
     def print_deffile(self):
         '''print the definition file for the user to see
@@ -259,7 +268,8 @@ class SIFHeader:
         self.print_header()
         self.print_arch()
         self.print_descriptor_deffile() 
-        self.print_descriptor_partition() 
+        self.print_descriptor_partition()
+        self.print_descriptor_signature()
 
 ################################################################################
 # Descriptors
@@ -342,15 +352,13 @@ class SIFHeader:
         name = self.read_and_strip(filey, "%sc" % self.base.DescrNameLen)
         partition['name'] = name
 
-        # I think partype and fstype might be part of extra?
+        # partype and fstype might be part of extra?
         fstype, partype = self.unpack_bytes(filey, "2i")
         partition['fstype'] = fstype        
         partition['partype'] = partype
 
         # The remaining extra is the self.base.DescrMaxPrivLen - len(2i)
-        fmt = '%sc' % (self.base.DescrMaxPrivLen - calcsize('2i'))
-       
-        # Can we get a name (this seems wrong) !
+        fmt = '%sc' % (self.base.DescrMaxPrivLen - calcsize('2i'))       
         extra = self.read_and_strip(filey, fmt)
 
         partition['extra'] = extra
@@ -364,8 +372,6 @@ class SIFHeader:
     def _load_signature(self):
         '''finally, load the signature descriptor. We again get the start
            based on loading the partition first.
-
-           # NOT DONE YET
         '''
         if not hasattr(self.Signature, 'start'):
             self._load_partition()
@@ -373,8 +379,30 @@ class SIFHeader:
         filey = open(self.image, 'rb')
 
         signature = dict()
+        filey.seek(self.Signature.start)
+        values = self.unpack_bytes(filey, self.Signature.fmt)
 
-        # NOT DONE YET
+        # If the first value is 0, the container isn't signed
+        if values[0] != 0:
+
+            for d in range(len(values)):
+                signature[self.Signature.fields[d]] = values[d]
+
+            # squashfs-955608129.img
+            name = self.read_and_strip(filey, "%sc" % self.base.DescrNameLen)
+            signature['name'] = name
+            hashtype, = self.unpack_bytes(filey, "i") # unpack tuple
+
+            # We need to parse the entity here (I don't know what that means)
+            # see self.base.DescEntityLen
+
+            # Go to the signature block, and retrieve it
+            filey.seek(signature['Fileoff'])
+            fmt = '%sc' % signature['Filelen']
+            signed = self.read_and_strip(filey, fmt)
+
+            signature['hastype'] = hashtype
+            signature['publicKey'] = signed
 
         filey.close()
         return signature

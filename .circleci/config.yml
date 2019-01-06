@@ -27,7 +27,7 @@ workflows:
             - run:
                 name: Preview Docker Tag for Build
                 command: |
-                   DOCKER_TAG=$(docker run singularityhub/sif --version)
+                   DOCKER_TAG=$(docker run singularityhub/sif:${CIRCLE_SHA} --version)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
 
   # This workflow will deploy images on merge to master only

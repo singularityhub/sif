@@ -16,7 +16,7 @@ after the interpreter line:
 **This is a SIF image**
 
 ```python
-image = 'salad.simg'
+image = 'boxes.simg'
 from sif.main import SIFHeader
 header = SIFHeader(image)
 
@@ -24,6 +24,7 @@ boxes.simg is a SIF file.
 Architecture: AMD64 arch code
 Found SIF version 01
 Found SIF arch 02
+...
 ```
 
 You don't have to load the header right away:

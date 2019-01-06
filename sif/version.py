@@ -1,5 +1,5 @@
 
-# Copyright (C) 2018 Vanessa Sochat.
+# Copyright (C) 2018-2019 Vanessa Sochat.
 
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License as published by
@@ -16,7 +16,7 @@
 
 
 
-__version__ = "0.0.1"
+__version__ = "0.0.11"
 AUTHOR = 'Vanessa Sochat'
 AUTHOR_EMAIL = 'vsochat@stanford.edu'
 NAME = 'sif'

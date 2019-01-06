@@ -1,5 +1,5 @@
 
-# Copyright (C) 2018 Vanessa Sochat.
+# Copyright (C) 2018-2019 Vanessa Sochat.
 
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU Affero General Public License as published by
@@ -128,8 +128,12 @@ class SIFHeader:
             # Read # of bytes corresponding to length of sif magic
             fmt = "%ss" % self.base.HdrMagicLen
 
-            # Read length of header magic
-            line = self.unpack_chars(filey, fmt=fmt)
+            # Read length of header magic (if fails, not sif)
+            try:
+                line = self.unpack_chars(filey, fmt=fmt)
+            except UnicodeDecodeError:
+                pass
+                return False
 
             if line != None:
                 if isinstance(line, str) and line.startswith(self.base.HdrMagic):

@@ -26,7 +26,6 @@ import re
 import shutil
 import tempfile
 import tarfile
-import requests
 
 import json
 from sif.utils import get_installdir

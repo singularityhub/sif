@@ -37,5 +37,6 @@ workflows:
                 command: |
                    DOCKER_TAG=$(docker run singularityhub/sif:latest --version)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
+                   docker tag singularityhub/sif:latest singularityhub/sif:${DOCKER_TAG}
                    docker push singularityhub/sif:${DOCKER_TAG}
 

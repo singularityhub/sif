@@ -9,7 +9,7 @@ workflows:
   build_without_publishing_job:
     jobs:
       - docker-publish/publish:
-          image: singularityhub/sif
+          image: singularityhub/sif:latest
           deploy: false
           filters:
             branches:

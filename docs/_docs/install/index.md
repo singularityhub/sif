@@ -9,5 +9,5 @@ There are several ways for you to install {{ site.title }}, and your preference 
 depend on your operating system, or intended purpose.
 
  - [Local]({{ site.baseurl }}/install/local/): is local installation of {{ site.title }}. You will need dependencies on your host.
- - [Docker]({{ site.baseurl }}/install/docker/): is a good solution for a reproducible install. You can run or develop deid without needing the dependencies on your system.
+ - [Docker]({{ site.baseurl }}/install/docker/): is a good solution for a reproducible install. You can run or develop sif python without needing the dependencies on your system.
 

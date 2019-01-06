@@ -9,7 +9,7 @@ To use the Docker container, you should first ensure that you have
 
 For the container we will use, we currently provide a container hosted 
 at [singularityhub/sif](http://hub.docker.com/r/singularityhub/sif) that you can use to 
-quickly run deid without any installation of other dependencies
+quickly run sif python without any installation of other dependencies
 or compiling on your host. 
 
 When you are ready, try running {{ site.title }} using it. This first command will

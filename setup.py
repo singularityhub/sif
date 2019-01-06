@@ -1,6 +1,6 @@
 '''
 
-Copyright (C) 2018 Vanessa Sochat.
+Copyright (C) 2018-2019 Vanessa Sochat.
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU Affero General Public License as published by
@@ -115,4 +115,4 @@ if __name__ == "__main__":
               'Programming Language :: Python :: 3',
           ],
 
-          entry_points = {'console_scripts': [ 'spython=spython.client:main' ] })
+          entry_points = {'console_scripts': [ 'sif=sif.client:main' ] })

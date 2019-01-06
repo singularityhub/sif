@@ -20,6 +20,7 @@ workflows:
       - docker-publish/publish:
           image: singularityhub/sif
           deploy: false
+          tag: latest
           filters:
             branches:
               ignore: master
@@ -27,24 +28,23 @@ workflows:
             - run:
                 name: Preview Docker Tag for Build
                 command: |
-                   DOCKER_TAG=$(docker run singularityhub/sif:${CIRCLE_SHA} --version)
+                   DOCKER_TAG=$(docker run singularityhub/sif:latest --version)
                    echo "Version for Docker tag is ${DOCKER_TAG}"
 
   # This workflow will deploy images on merge to master only
-  build_and_publish_docker_images:
+  docker_with_lifecycle:
     jobs:
       - docker-publish/publish:
-          image: pydicom/dicom-header-cleaner
-          dockerfile: header/Dockerfile
-          path: header
-          filters:
-            branches:
-              only: master
-      - docker-publish/publish:
-          image: pydicom/dicom-header-cleaner
+          image: singularityhub/sif
           tag: latest
-          dockerfile: header/Dockerfile
-          path: header
           filters:
             branches:
-              only: master
+              ignore: master
+          after_build:
+            - run:
+                name: Publish Docker Tag with SIF Python Version
+                command: |
+                   DOCKER_TAG=$(docker run singularityhub/sif:latest --version)
+                   echo "Version for Docker tag is ${DOCKER_TAG}"
+                   docker push singularityhub/sif:${DOCKER_TAG}
+

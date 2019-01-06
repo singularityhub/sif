@@ -16,5 +16,6 @@ RUN apk update && \
     mkdir -p /code
 
 ADD . /code
+WORKDIR /code
 RUN python3 setup.py install
 ENTRYPOINT ["ipython"]

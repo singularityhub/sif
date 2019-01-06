@@ -18,4 +18,4 @@ RUN apk update && \
 ADD . /code
 WORKDIR /code
 RUN python3 setup.py install
-ENTRYPOINT ["ipython"]
+ENTRYPOINT ["sif"]

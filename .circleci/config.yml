@@ -14,7 +14,9 @@ workflows:
           tag: latest
           filters:
             branches:
-              ignore: master
+              ignore: 
+                - master
+                - docs*
           after_build:
             - run:
                 name: Preview Docker Tag for Build

@@ -127,10 +127,10 @@ class SIFHeader:
 
             # Read # of bytes corresponding to length of sif magic
             fmt = "%ss" % self.base.HdrMagicLen
-
-            # Read length of header magic (if fails, not sif)
+ 
+            # Read length of header magic (if fails, not sif)           
             try:
-                line = self.unpack_chars(filey, fmt=fmt)
+                line = self.unpack_chars(filey, fmt)
             except UnicodeDecodeError:
                 pass
                 return False
@@ -142,11 +142,11 @@ class SIFHeader:
             return False
 
 
-    def unpack_chars(self, filey, fmt, number=None, encoding='utf-8', idx=0):
+    def unpack_chars(self, filey, fmt, number=None, encoding='utf-8'):
         '''unpack characters, and handle the encoding and removing
            an end character.
         '''
-        line = self.unpack_bytes(filey, fmt, number)[idx]
+        line, = self.unpack_bytes(filey, fmt, number)
 
         # Return numbers, otherwise parse bytes to string
         if isinstance(line, (int, float)):

@@ -30,7 +30,7 @@ workflows:
           tag: latest
           filters:
             branches:
-              ignore: master
+             only: master
           after_build:
             - run:
                 name: Publish Docker Tag with SIF Python Version

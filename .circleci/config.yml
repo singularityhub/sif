@@ -11,15 +11,6 @@ workflows:
       - docker-publish/publish:
           image: singularityhub/sif
           deploy: false
-          filters:
-            branches:
-              ignore: master
-
-  docker_with_lifecycle:
-    jobs:
-      - docker-publish/publish:
-          image: singularityhub/sif
-          deploy: false
           tag: latest
           filters:
             branches:

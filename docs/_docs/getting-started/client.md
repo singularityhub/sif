@@ -5,7 +5,7 @@ order: 2
 ---
 
 SIF Python provides a command line executable to easily give you access to a
-Python shell with your container loaded. After you [install]({{ site.url }}{{ site.baseurl }}/install/)
+Python shell with your container loaded. After you [install](https://singularityhub.github.io/sif/install/index.html)
 SIF Python, you can see the client with the command line executable "sif":
 
 ```bash

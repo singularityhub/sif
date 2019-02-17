@@ -149,5 +149,5 @@ ERROR salad.simg is not a SIF file.
 
 ## Licenses
 
-This code is licensed under the Affero GPL, version 3.0 or later [LICENSE](LICENSE).
+This code is licensed under the MPL 2.0 [LICENSE](LICENSE).
 The SIF Header format is licesed by [Sylabs](https://github.com/sylabs/sif/blob/master/pkg/sif/sif.go).
